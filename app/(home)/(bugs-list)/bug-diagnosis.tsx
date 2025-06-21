@@ -108,9 +108,9 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
             >
               <div className="flex items-center gap-2 mb-1">
                 {index < currentStep ? (
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
                 ) : index === currentStep ? (
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full animate-pulse bg-primary"></div>
                 ) : (
                   <div className="w-2 h-2 rounded-full bg-muted-foreground/30"></div>
                 )}
@@ -138,7 +138,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
         <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
           <Card className="flex flex-col h-full">
             <CardHeader className="flex-shrink-0 pb-2">
-              <CardTitle className="text-sm text-red-600">
+              <CardTitle className="text-sm text-destructive">
                 Bad Scenario
               </CardTitle>
             </CardHeader>
@@ -147,7 +147,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
                 {streamedBadLogs.map((log, index) => (
                   <div
                     key={index}
-                    className="animate-in slide-in-from-left-2 duration-300 text-red-700 bg-red-50 px-2 py-1 rounded border-l-2 border-red-300"
+                    className="animate-in slide-in-from-left-2 duration-300 text-foreground px-2 py-1 rounded border-l-2 border-destructive/30"
                   >
                     {log}
                   </div>
@@ -167,7 +167,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
                 {streamedGoodLogs.map((log, index) => (
                   <div
                     key={index}
-                    className="animate-in slide-in-from-right-2 duration-300 text-primary bg-green-50 px-2 py-1 rounded border-l-2 border-green-300"
+                    className="animate-in slide-in-from-right-2 duration-300  px-2 py-1 rounded border-l-2 border-primary/30"
                   >
                     {log}
                   </div>

@@ -6,11 +6,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getBugsData() {
-  return [
+  // Define bugs without timestamps first
+  const bugsWithoutTimestamps = [
     {
       id: 1,
       name: 'Memory leak causing periodic crashes',
-      occurredAt: '2025-06-21T07:00:00Z',
       severity: 'high',
       bad: [
         '[14:30:00] Starting scrape batch #847',
@@ -59,7 +59,6 @@ export function getBugsData() {
     {
       id: 2,
       name: 'Session token expiration',
-      occurredAt: '2025-06-21T21:00:00Z',
       severity: 'medium',
       bad: [
         '[11:45:33] Session token: abc123...expires in 3602s',
@@ -106,7 +105,6 @@ export function getBugsData() {
     {
       id: 3,
       name: 'User agent detection triggering different content',
-      occurredAt: '2025-06-22T04:00:00Z',
       severity: 'high',
       bad: [
         '[16:22:10] User-Agent: Chrome/118.0.0.0 (headless)',
@@ -153,7 +151,6 @@ export function getBugsData() {
     {
       id: 4,
       name: 'JavaScript execution timing race condition',
-      occurredAt: '2025-06-21T14:00:00Z',
       severity: 'medium',
       bad: [
         '[19:05:12] Page loaded: /search?q=wireless-headphones',
@@ -198,7 +195,6 @@ export function getBugsData() {
     {
       id: 5,
       name: 'Database connection pool exhaustion',
-      occurredAt: '2025-06-21T16:00:00Z',
       severity: 'medium',
       bad: [
         '[15:44:20] Starting scrape operation for 500 products',
@@ -246,7 +242,6 @@ export function getBugsData() {
     {
       id: 6,
       name: 'CDN serving stale cached content',
-      occurredAt: '2025-06-21T15:00:00Z',
       severity: 'low',
       bad: [
         '[13:15:22] Requesting: /api/products/12345',
@@ -293,7 +288,6 @@ export function getBugsData() {
     {
       id: 7,
       name: 'Third-party API rate limiting fluctuation',
-      occurredAt: '2025-06-22T00:00:00Z',
       severity: 'medium',
       bad: [
         '[17:30:15] Calling geocoding API for address validation',
@@ -340,7 +334,6 @@ export function getBugsData() {
     {
       id: 8,
       name: 'Browser window focus affecting JavaScript execution',
-      occurredAt: '2025-06-21T08:00:00Z',
       severity: 'low',
       bad: [
         '[14:20:30] Opening new browser tab for /interactive-catalog',
@@ -387,7 +380,6 @@ export function getBugsData() {
     {
       id: 9,
       name: 'Random CAPTCHA appearing during scraping',
-      occurredAt: '2025-06-21T20:00:00Z',
       severity: 'high',
       bad: [
         '[12:15:33] Navigating to product page #127',
@@ -434,7 +426,6 @@ export function getBugsData() {
     {
       id: 10,
       name: 'Network proxy rotation causing SSL handshake failures',
-      occurredAt: '2025-06-21T18:00:00Z',
       severity: 'low',
       bad: [
         '[18:44:12] Rotating to proxy: 203.0.113.45:8080',
@@ -479,189 +470,83 @@ export function getBugsData() {
       ],
     },
   ]
+
+  // Get graph data to find when bugs occurred
+  const currentTime = new Date()
+  const graphData = getGraphData()
+
+  // Create mapping of bug ID to when it occurred
+  const bugOccurrenceMapping: Record<number, string> = {}
+
+  graphData.forEach((dataPoint, index) => {
+    dataPoint.relatedBugs.forEach((bugId) => {
+      if (!bugOccurrenceMapping[bugId]) {
+        // Calculate hours ago based on the graph data index
+        const hoursAgo = graphData.length - 1 - index
+        const bugTimestamp = new Date(currentTime)
+        bugTimestamp.setHours(bugTimestamp.getHours() - hoursAgo)
+        bugTimestamp.setMinutes(0, 0, 0)
+        bugOccurrenceMapping[bugId] = bugTimestamp.toISOString()
+      }
+    })
+  })
+
+  // Add timestamps to bugs dynamically
+  return bugsWithoutTimestamps.map((bug) => ({
+    ...bug,
+    occurredAt: bugOccurrenceMapping[bug.id] || currentTime.toISOString(),
+  }))
 }
 
 export function getGraphData() {
-  return [
-    {
-      timestamp: '2025-06-21T00:00:00Z',
-      successRate: 0.79,
-      failureRate: 0.21,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T01:00:00Z',
-      successRate: 0.91,
-      failureRate: 0.09,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T02:00:00Z',
-      successRate: 0.94,
-      failureRate: 0.06,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T03:00:00Z',
-      successRate: 0.97,
-      failureRate: 0.03,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T04:00:00Z',
-      successRate: 0.92,
-      failureRate: 0.08,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T05:00:00Z',
-      successRate: 0.95,
-      failureRate: 0.05,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T06:00:00Z',
-      successRate: 0.93,
-      failureRate: 0.07,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T07:00:00Z',
-      successRate: 0.59,
-      failureRate: 0.41,
-      relatedBugs: [1], // Memory leak causing periodic crashes
-    },
-    {
-      timestamp: '2025-06-21T08:00:00Z',
-      successRate: 0.82,
-      failureRate: 0.18,
-      relatedBugs: [8], // Browser window focus affecting JavaScript execution
-    },
-    {
-      timestamp: '2025-06-21T09:00:00Z',
-      successRate: 0.94,
-      failureRate: 0.06,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T10:00:00Z',
-      successRate: 0.97,
-      failureRate: 0.03,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T11:00:00Z',
-      successRate: 0.91,
-      failureRate: 0.09,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T12:00:00Z',
-      successRate: 0.96,
-      failureRate: 0.04,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T13:00:00Z',
-      successRate: 0.93,
-      failureRate: 0.07,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T14:00:00Z',
-      successRate: 0.81,
-      failureRate: 0.19,
-      relatedBugs: [4], // JavaScript execution timing race condition
-    },
-    {
-      timestamp: '2025-06-21T15:00:00Z',
-      successRate: 0.89,
-      failureRate: 0.11,
-      relatedBugs: [6], // CDN serving stale cached content
-    },
-    {
-      timestamp: '2025-06-21T16:00:00Z',
-      successRate: 0.84,
-      failureRate: 0.16,
-      relatedBugs: [5], // Database connection pool exhaustion
-    },
-    {
-      timestamp: '2025-06-21T17:00:00Z',
-      successRate: 0.95,
-      failureRate: 0.05,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T18:00:00Z',
-      successRate: 0.9,
-      failureRate: 0.1,
-      relatedBugs: [10], // Network proxy rotation causing SSL handshake failures
-    },
-    {
-      timestamp: '2025-06-21T19:00:00Z',
-      successRate: 0.93,
-      failureRate: 0.07,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T20:00:00Z',
-      successRate: 0.91,
-      failureRate: 0.09,
-      relatedBugs: [9], // Random CAPTCHA appearing during scraping
-    },
-    {
-      timestamp: '2025-06-21T21:00:00Z',
-      successRate: 0.62,
-      failureRate: 0.38,
-      relatedBugs: [2], // Session token expiration
-    },
-    {
-      timestamp: '2025-06-21T22:00:00Z',
-      successRate: 0.92,
-      failureRate: 0.08,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-21T23:00:00Z',
-      successRate: 0.96,
-      failureRate: 0.04,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-22T00:00:00Z',
-      successRate: 0.87,
-      failureRate: 0.13,
-      relatedBugs: [7], // Third-party API rate limiting fluctuation
-    },
-    {
-      timestamp: '2025-06-22T01:00:00Z',
-      successRate: 0.94,
-      failureRate: 0.06,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-22T02:00:00Z',
-      successRate: 0.9,
-      failureRate: 0.1,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-22T03:00:00Z',
-      successRate: 0.96,
-      failureRate: 0.04,
-      relatedBugs: [],
-    },
-    {
-      timestamp: '2025-06-22T04:00:00Z',
-      successRate: 0.57,
-      failureRate: 0.43,
-      relatedBugs: [3], // User agent detection triggering different content
-    },
-    {
-      timestamp: '2025-06-22T05:00:00Z',
-      successRate: 0.89,
-      failureRate: 0.11,
-      relatedBugs: [],
-    },
+  const now = new Date()
+  const data = []
+
+  // Define the base success/failure patterns and which hours have bugs
+  const patterns = [
+    { successRate: 0.79, failureRate: 0.21, relatedBugs: [] }, // 30 hours ago
+    { successRate: 0.91, failureRate: 0.09, relatedBugs: [] },
+    { successRate: 0.94, failureRate: 0.06, relatedBugs: [] },
+    { successRate: 0.97, failureRate: 0.03, relatedBugs: [] },
+    { successRate: 0.92, failureRate: 0.08, relatedBugs: [] },
+    { successRate: 0.95, failureRate: 0.05, relatedBugs: [] },
+    { successRate: 0.93, failureRate: 0.07, relatedBugs: [] },
+    { successRate: 0.59, failureRate: 0.41, relatedBugs: [1] }, // Memory leak - 23 hours ago
+    { successRate: 0.82, failureRate: 0.18, relatedBugs: [8] }, // Browser window focus - 22 hours ago
+    { successRate: 0.94, failureRate: 0.06, relatedBugs: [] },
+    { successRate: 0.97, failureRate: 0.03, relatedBugs: [] }, // 20 hours ago
+    { successRate: 0.91, failureRate: 0.09, relatedBugs: [] },
+    { successRate: 0.96, failureRate: 0.04, relatedBugs: [] },
+    { successRate: 0.93, failureRate: 0.07, relatedBugs: [] },
+    { successRate: 0.81, failureRate: 0.19, relatedBugs: [4] }, // JavaScript timing - 16 hours ago
+    { successRate: 0.89, failureRate: 0.11, relatedBugs: [6] }, // CDN stale content - 15 hours ago
+    { successRate: 0.84, failureRate: 0.16, relatedBugs: [5] }, // DB connection pool - 14 hours ago
+    { successRate: 0.95, failureRate: 0.05, relatedBugs: [] },
+    { successRate: 0.9, failureRate: 0.1, relatedBugs: [10] }, // Network proxy SSL - 12 hours ago
+    { successRate: 0.93, failureRate: 0.07, relatedBugs: [] },
+    { successRate: 0.91, failureRate: 0.09, relatedBugs: [9] }, // CAPTCHA - 10 hours ago
+    { successRate: 0.62, failureRate: 0.38, relatedBugs: [2] }, // Session token - 9 hours ago
+    { successRate: 0.92, failureRate: 0.08, relatedBugs: [] },
+    { successRate: 0.96, failureRate: 0.04, relatedBugs: [] },
+    { successRate: 0.87, failureRate: 0.13, relatedBugs: [7] }, // API rate limiting - 6 hours ago
+    { successRate: 0.94, failureRate: 0.06, relatedBugs: [] },
+    { successRate: 0.9, failureRate: 0.1, relatedBugs: [] },
+    { successRate: 0.96, failureRate: 0.04, relatedBugs: [] },
+    { successRate: 0.57, failureRate: 0.43, relatedBugs: [3] }, // User agent detection - 2 hours ago
+    { successRate: 0.89, failureRate: 0.11, relatedBugs: [] }, // 1 hour ago
   ]
+
+  // Generate data going backwards from now
+  for (let i = 0; i < patterns.length; i++) {
+    const timestamp = new Date(now)
+    timestamp.setHours(timestamp.getHours() - (patterns.length - 1 - i))
+    timestamp.setMinutes(0, 0, 0) // Round to the hour
+
+    data.push({
+      timestamp: timestamp.toISOString(),
+      ...patterns[i],
+    })
+  }
+
+  return data
 }

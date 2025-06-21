@@ -44,7 +44,7 @@ export function BugHoverCard({ bug }: BugHoverCardProps) {
       <HoverCardTrigger asChild>
         <Button
           variant="link"
-          className="h-auto p-2 text-left justify-start flex-col items-start"
+          className="h-auto p-2 text-left justify-start text-foreground flex-col items-start"
         >
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs">
