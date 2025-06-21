@@ -13,6 +13,8 @@ import { BugDiagnosis } from './(bugs-list)/bug-diagnosis'
 interface Bug {
   id: number
   name: string
+  occurredAt: string
+  severity: string
   bad: string[]
   good: string[]
   diagnosis: string

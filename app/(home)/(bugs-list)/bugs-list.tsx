@@ -4,6 +4,8 @@ import { BugHoverCard } from './hover-bug-card'
 interface Bug {
   id: number
   name: string
+  occurredAt: string
+  severity: string
   bad: string[]
   good: string[]
   diagnosis: string

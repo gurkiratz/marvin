@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator'
 interface Bug {
   id: number
   name: string
+  occurredAt: string
+  severity: string
   bad: string[]
   good: string[]
   diagnosis: string
