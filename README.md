@@ -1,4 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Kevin
+
+Autonomous Q/A Engineer for Web Scrappers
+
+### UI
+
+- Use hover card component for list of bugs
+
+- Enter the app, click start webscrapping
+- there's a status bar on bottom similar to vscode's, but its showing scrapper running status, number of bugs, Health status
+- Header, sidebar
 
 ## Getting Started
 
