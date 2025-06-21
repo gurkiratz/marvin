@@ -1,7 +1,24 @@
 import { getBugsData } from '@/lib/utils'
 import { BugHoverCard } from './hover-bug-card'
 
-export function BugsList() {
+interface Bug {
+  id: number
+  name: string
+  bad: string[]
+  good: string[]
+  diagnosis: string
+  diagnosis_steps: Array<{
+    name: string
+    description: string
+  }>
+}
+
+interface BugsListProps {
+  onBugSelect: (bug: Bug) => void
+  selectedBugId?: number
+}
+
+export function BugsList({ onBugSelect, selectedBugId }: BugsListProps) {
   const bugs = getBugsData()
 
   return (
@@ -9,7 +26,15 @@ export function BugsList() {
       <h3 className="text-lg font-semibold mb-4">Bugs List</h3>
       <div className="flex flex-col gap-1">
         {bugs.map((bug) => (
-          <BugHoverCard key={bug.id} bug={bug} />
+          <div
+            key={bug.id}
+            className={`cursor-pointer rounded-lg transition-colors ${
+              selectedBugId === bug.id ? 'bg-primary/10' : 'hover:bg-muted/50'
+            }`}
+            onClick={() => onBugSelect(bug)}
+          >
+            <BugHoverCard bug={bug} />
+          </div>
         ))}
       </div>
     </div>

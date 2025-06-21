@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { ChartAreaInteractive } from '@/components/graph/chart-area-interactive'
 import {
   ResizableHandle,
@@ -5,33 +8,58 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { BugsList } from './(bugs-list)/bugs-list'
+import { BugDiagnosis } from './(bugs-list)/bug-diagnosis'
+
+interface Bug {
+  id: number
+  name: string
+  bad: string[]
+  good: string[]
+  diagnosis: string
+  diagnosis_steps: Array<{
+    name: string
+    description: string
+  }>
+}
 
 export function HomeResizable() {
+  const [selectedBug, setSelectedBug] = useState<Bug | null>(null)
+
+  const handleBugSelect = (bug: Bug) => {
+    setSelectedBug(bug)
+  }
+
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="max-w-full rounded-lg border md:min-w-[450px]"
-    >
-      <ResizablePanel defaultSize={50}>
-        <ResizablePanelGroup direction="vertical">
-          <ResizablePanel defaultSize={40}>
-            {/* <div className="flex h-full items-center justify-center p-6">
-              <span className="font-semibold">Two</span>
-            </div> */}
-            <ChartAreaInteractive />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={60}>
-            <div className="flex h-full items-center justify-center p-6">
-              <span className="font-semibold">Three</span>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={20}>
-        <BugsList />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <div className="h-full w-full">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="h-full w-full rounded-lg border"
+      >
+        <ResizablePanel defaultSize={70} minSize={30}>
+          <ResizablePanelGroup direction="vertical" className="h-full">
+            <ResizablePanel defaultSize={40} minSize={20}>
+              <div className="h-full w-full">
+                <ChartAreaInteractive />
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={60} minSize={30}>
+              <div className="h-full w-full overflow-hidden">
+                <BugDiagnosis selectedBug={selectedBug} />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={30} minSize={20}>
+          <div className="h-full w-full overflow-hidden">
+            <BugsList
+              onBugSelect={handleBugSelect}
+              selectedBugId={selectedBug?.id}
+            />
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   )
 }

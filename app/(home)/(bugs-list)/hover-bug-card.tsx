@@ -9,7 +9,7 @@ interface BugHoverCardProps {
   bug: {
     id: number
     name?: string
-    analysis: string
+    diagnosis: string
   }
 }
 
@@ -25,7 +25,7 @@ export function BugHoverCard({ bug }: BugHoverCardProps) {
       <HoverCardContent className="w-80">
         <div className="space-y-2">
           <h4 className="text-sm font-semibold">Bug Analysis</h4>
-          <p className="text-sm text-muted-foreground">{bug.analysis}</p>
+          <p className="text-sm text-muted-foreground">{bug.diagnosis}</p>
         </div>
       </HoverCardContent>
     </HoverCard>
