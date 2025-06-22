@@ -96,7 +96,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
 
   if (!selectedBug) {
     return (
-      <div className="p-6 h-full flex items-center justify-center">
+      <div className="p-6 h-full flex items-start justify-center">
         <div className="text-center text-muted-foreground">
           <div className="text-lg mb-2">🔍</div>
           <p>Select a bug to start diagnosis</p>
