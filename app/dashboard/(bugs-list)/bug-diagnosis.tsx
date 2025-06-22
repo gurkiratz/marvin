@@ -47,17 +47,17 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
   const startDiagnosis = async () => {
     if (!selectedBug) return
 
-    // Step through diagnosis steps
+    // Step through diagnosis steps faster
     for (let i = 0; i < selectedBug.diagnosis_steps.length; i++) {
       setCurrentStep(i)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 1000)) // Reduced from 2000ms to 500ms
     }
 
     // Finish thinking
     setIsThinking(false)
     setShowLogs(true)
 
-    // Stream logs
+    // Stream logs instantly
     await streamLogs()
 
     // Start streaming diagnosis after logs are done
@@ -67,17 +67,9 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
   const streamLogs = async () => {
     if (!selectedBug) return
 
-    const maxLength = Math.max(selectedBug.bad.length, selectedBug.good.length)
-
-    for (let i = 0; i < maxLength; i++) {
-      if (i < selectedBug.bad.length) {
-        setStreamedBadLogs((prev) => [...prev, selectedBug.bad[i]])
-      }
-      if (i < selectedBug.good.length) {
-        setStreamedGoodLogs((prev) => [...prev, selectedBug.good[i]])
-      }
-      await new Promise((resolve) => setTimeout(resolve, 800))
-    }
+    // Show all logs instantly without delay
+    setStreamedBadLogs(selectedBug.bad)
+    setStreamedGoodLogs(selectedBug.good)
   }
 
   const streamDiagnosis = async () => {
@@ -176,7 +168,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
           <Card className="flex flex-col h-full">
             <CardHeader className="flex-shrink-0 pb-2">
               <CardTitle className="text-sm text-destructive">
-                Bad Scenario
+                Failed Logs
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 p-3 overflow-auto">
@@ -184,7 +176,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
                 {streamedBadLogs.map((log, index) => (
                   <div
                     key={index}
-                    className="animate-in slide-in-from-left-2 duration-300 text-foreground px-2 py-1 rounded border-l-2 border-destructive/30"
+                    className="text-foreground px-2 py-1 rounded border-l-2 border-destructive/30"
                   >
                     {log}
                   </div>
@@ -204,7 +196,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
                 {streamedGoodLogs.map((log, index) => (
                   <div
                     key={index}
-                    className="animate-in slide-in-from-right-2 duration-300  px-2 py-1 rounded border-l-2 border-primary/30"
+                    className="px-2 py-1 rounded border-l-2 border-primary/30"
                   >
                     {log}
                   </div>
