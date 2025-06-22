@@ -109,7 +109,6 @@ export function ChartAreaInteractive({
                   duration: 4000,
                 })
                 setRegisteredBugs((prev) => new Set([...prev, bugId]))
-                250
               }
             }
           })
