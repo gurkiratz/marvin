@@ -104,11 +104,11 @@ export default function Home() {
         <div className="container max-w-4xl mx-auto text-center space-y-8">
           <div className="space-y-4">
             <h2 className="font-serif text-3xl md:text-4xl text-foreground">
-              Ready to fix what's broken?
+              Ready to fix what&apos;s broken?
             </h2>
             <p className="font-serif text-lg text-muted-foreground">
-              Join developers who've already reduced their debugging time by
-              80%.
+              Join developers who&apos;ve already reduced their debugging time
+              by 80%.
             </p>
           </div>
           <Button size="lg" className="text-lg px-8 py-6" asChild>
