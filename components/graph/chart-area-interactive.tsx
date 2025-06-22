@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Card,
@@ -25,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getGraphData } from '@/lib/utils'
+import { getGraphData, getBugsData } from '@/lib/utils'
 
 export const description = 'Scraper Success/Failure Rates'
 
@@ -43,9 +45,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
-  const [timeRange, setTimeRange] = React.useState('all')
+export function ChartAreaInteractive({
+  onLoadingComplete,
+}: {
+  onLoadingComplete?: () => void
+}) {
+  const [timeRange, setTimeRange] = React.useState('24h')
+  const [animatedDataLength, setAnimatedDataLength] = React.useState(0)
+  const [registeredBugs, setRegisteredBugs] = React.useState<Set<number>>(
+    new Set()
+  )
   const rawData = getGraphData()
+  const bugsData = getBugsData()
 
   const filteredData = rawData
     .filter((item) => {
@@ -72,8 +83,63 @@ export function ChartAreaInteractive() {
       failureRate: Math.round(item.failureRate * 100),
     }))
 
+  // Time-lapse animation effect with bug detection
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setAnimatedDataLength((prev) => {
+        if (prev >= filteredData.length) {
+          clearInterval(timer)
+          // Notify parent that loading is complete (async to avoid render cycle issues)
+          setTimeout(() => {
+            onLoadingComplete?.()
+          }, 0)
+          return filteredData.length
+        }
+
+        // Check for new bugs at current data point
+        const currentDataPoint = filteredData[prev]
+        if (currentDataPoint?.relatedBugs) {
+          currentDataPoint.relatedBugs.forEach((bugId) => {
+            if (!registeredBugs.has(bugId)) {
+              const bug = bugsData.find((b) => b.id === bugId)
+              if (bug) {
+                // Show toast notification for new bug
+                toast.error(`Bug Detected: ${bug.name}`, {
+                  description: `Severity: ${bug.severity.toUpperCase()}`,
+                  duration: 4000,
+                })
+                setRegisteredBugs((prev) => new Set([...prev, bugId]))
+                250
+              }
+            }
+          })
+        }
+
+        return prev + 1
+      })
+    }, 250) // Show new data point every 500ms for time-lapse effect
+
+    return () => clearInterval(timer)
+  }, [
+    filteredData.length,
+    timeRange,
+    registeredBugs,
+    bugsData,
+    onLoadingComplete,
+  ])
+
+  // Reset animation when time range changes
+  React.useEffect(() => {
+    setAnimatedDataLength(0)
+    setRegisteredBugs(new Set())
+  }, [timeRange])
+
+  // Get animated data slice
+  const displayData = filteredData.slice(0, animatedDataLength)
+  const isLoading = animatedDataLength < filteredData.length
+
   return (
-    <Card className="pt-0 h-full">
+    <Card className="pt-0 h-full relative">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
           <CardTitle>Scraper Success/Failure Rates</CardTitle>
@@ -82,11 +148,8 @@ export function ChartAreaInteractive() {
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
-            aria-label="Select a time range"
-          >
-            <SelectValue placeholder="All time" />
+          <SelectTrigger className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex">
+            <SelectValue placeholder="Last 24 hours" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             <SelectItem value="all" className="rounded-lg">
@@ -104,12 +167,28 @@ export function ChartAreaInteractive() {
           </SelectContent>
         </Select>
       </CardHeader>
+
+      {/* Status Bar */}
+      {isLoading && (
+        <div className="absolute top-20 left-4 right-4 z-10">
+          <div className="bg-background/95 backdrop-blur-sm border rounded-lg px-4 py-2 shadow-sm">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Scraping system data...</span>
+              <span className="text-xs">
+                ({animatedDataLength}/{filteredData.length} points)
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <AreaChart data={filteredData}>
+          <AreaChart data={displayData}>
             <defs>
               <linearGradient id="fillFailureRate" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -179,6 +258,8 @@ export function ChartAreaInteractive() {
               fill="url(#fillSuccessRate)"
               stroke="var(--color-successRate)"
               fillOpacity={0.6}
+              strokeWidth={2}
+              animationDuration={300}
             />
             <Area
               dataKey="failureRate"
@@ -186,6 +267,8 @@ export function ChartAreaInteractive() {
               fill="url(#fillFailureRate)"
               stroke="var(--color-failureRate)"
               fillOpacity={0.6}
+              strokeWidth={2}
+              animationDuration={300}
             />
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>

@@ -28,6 +28,8 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
   const [showLogs, setShowLogs] = useState(false)
   const [streamedBadLogs, setStreamedBadLogs] = useState<string[]>([])
   const [streamedGoodLogs, setStreamedGoodLogs] = useState<string[]>([])
+  const [streamedDiagnosis, setStreamedDiagnosis] = useState('')
+  const [isDiagnosisStreaming, setIsDiagnosisStreaming] = useState(false)
 
   useEffect(() => {
     if (selectedBug) {
@@ -36,6 +38,8 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
       setShowLogs(false)
       setStreamedBadLogs([])
       setStreamedGoodLogs([])
+      setStreamedDiagnosis('')
+      setIsDiagnosisStreaming(false)
       startDiagnosis()
     }
   }, [selectedBug])
@@ -55,6 +59,9 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
 
     // Stream logs
     await streamLogs()
+
+    // Start streaming diagnosis after logs are done
+    await streamDiagnosis()
   }
 
   const streamLogs = async () => {
@@ -71,6 +78,20 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
       }
       await new Promise((resolve) => setTimeout(resolve, 800))
     }
+  }
+
+  const streamDiagnosis = async () => {
+    if (!selectedBug) return
+
+    setIsDiagnosisStreaming(true)
+    const diagnosis = selectedBug.diagnosis
+
+    for (let i = 0; i <= diagnosis.length; i++) {
+      setStreamedDiagnosis(diagnosis.slice(0, i))
+      await new Promise((resolve) => setTimeout(resolve, 20)) // 20ms per character for smooth streaming
+    }
+
+    setIsDiagnosisStreaming(false)
   }
 
   if (!selectedBug) {
@@ -130,9 +151,25 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
     return (
       <div className="flex flex-col h-full p-4">
         <div className="flex-shrink-0 mb-4">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg font-semibold mb-3">
             Bug #{selectedBug.id}: {selectedBug.name}
           </h3>
+
+          {/* Streaming Diagnosis */}
+          <div className="bg-muted/30 rounded-lg p-3 border">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-sm font-medium">Diagnosis Summary</div>
+              {isDiagnosisStreaming && (
+                <div className="w-1 h-4 bg-primary animate-pulse"></div>
+              )}
+            </div>
+            <p className="text-sm text-gray-200 leading-relaxed">
+              {streamedDiagnosis}
+              {isDiagnosisStreaming && (
+                <span className="inline-block w-2 h-5 bg-primary animate-pulse ml-1"></span>
+              )}
+            </p>
+          </div>
         </div>
 
         <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
@@ -159,7 +196,7 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
           <Card className="flex flex-col h-full">
             <CardHeader className="flex-shrink-0 pb-2">
               <CardTitle className="text-sm text-primary">
-                Good Scenario
+                Ideal Scenario
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 p-3 overflow-auto">
@@ -175,16 +212,6 @@ export function BugDiagnosis({ selectedBug }: BugDiagnosisProps) {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        <div className="flex-shrink-0 mt-4">
-          <Separator className="mb-3" />
-          <div>
-            <h4 className="text-sm font-medium mb-2">Diagnosis</h4>
-            <p className="text-xs text-muted-foreground">
-              {selectedBug.diagnosis}
-            </p>
-          </div>
         </div>
       </div>
     )
